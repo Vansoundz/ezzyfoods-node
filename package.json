@@ -1,9 +1,13 @@
 {
   "name": "ezzyfoods",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Online food store",
+  "main": "app.js",
   "author": "vansoundz",
   "license": "MIT",
+  "engines": {
+    "node": "13.x"
+  },
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.ts",
