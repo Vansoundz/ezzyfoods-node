@@ -25,7 +25,7 @@ app.use(Express.json());
       useCreateIndex: true,
     });
 
-    app.use(Express.static("static"));
+    // app.use(Express.static("static"));
 
     app.use(`/products`, products);
     app.use(`/users`, users);
