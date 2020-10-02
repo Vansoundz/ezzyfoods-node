@@ -3,17 +3,41 @@ import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth.middleware";
 import ProductModel from "../models/product.model";
 import multer from "multer";
+import multerS3 from "multer-s3";
+// @ts-ignore
+import aws, { S3 } from "aws-sdk";
+import { config } from "dotenv";
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./static");
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}${file.originalname}`);
-  },
+config();
+
+var s3 = new S3({
+  accessKeyId: process.env.AWSAccessKeyId,
+  secretAccessKey: process.env.AWSSecretKey,
 });
 
-var upload = multer({ storage: storage });
+var upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: "ezzyfoodz",
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      cb(null, `${Date.now()}${file.originalname}`);
+    },
+  }),
+});
+
+// var storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "./static");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, `${Date.now()}${file.originalname}`);
+//   },
+// });
+
+// var upload = multer({ storage: storage });
 
 const router = Router();
 
@@ -80,7 +104,7 @@ router.post(
       const product = new ProductModel({ ...req.body });
       if (req.file) {
         // @ts-ignore
-        product.image = req.file.filename;
+        product.image = req.file.location;
       }
       // @ts-ignore
       product.user = req.userId;
@@ -121,7 +145,7 @@ router.patch(
 
       if (req.file) {
         // @ts-ignore
-        product.image = req.file.filename;
+        product.image = req.file.location;
       }
 
       Object.keys(req.body).forEach((key) => {
