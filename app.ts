@@ -1,9 +1,9 @@
-import Express, { Application } from "express";
+import Express, { Application, Request, Response } from "express";
 import { config } from "dotenv";
 import mongoose from "mongoose";
 // import { graphqlHTTP } from "express-graphql";
 // import schema from "./schema";
-import fileUpload from "./upload";
+// import fileUpload from "./upload";
 import products from "./routes/product.routes";
 import users from "./routes/auth.routes";
 import orders from "./routes/order.routes";
@@ -37,9 +37,12 @@ app.use(Express.json());
   }
 })();
 
-app.use(`/upload`, fileUpload);
+// app.use(`/upload`, fileUpload);
 app.use(Express.static("static"));
 
+app.get(`/`, (req: Request, res: Response) => {
+  res.send(Date.now());
+});
 app.use(`/products`, products);
 app.use(`/users`, users);
 app.use(`/orders`, orders);
