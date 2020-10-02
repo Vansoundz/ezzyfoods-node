@@ -32,7 +32,7 @@ app.use(Express.json());
     app.use(`/orders`, orders);
 
     app.get(`/`, (req: Request, res: Response) => {
-      res.send(Date.now());
+      res.json(Date.now());
     });
 
     const server = app.listen(PORT, () =>
