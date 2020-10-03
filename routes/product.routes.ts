@@ -7,6 +7,7 @@ import multerS3 from "multer-s3";
 // @ts-ignore
 import aws, { S3 } from "aws-sdk";
 import { config } from "dotenv";
+import CategoryModel from "../models/category.model";
 
 config();
 
@@ -43,11 +44,131 @@ const router = Router();
 
 router.get(`/`, async (req: Request, res: Response) => {
   try {
-    let products = await ProductModel.find({});
+    let products = await ProductModel.find({}).populate("category", ["name"]);
+    res.send({ products });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).send({
+      errors: [
+        {
+          msg: "Server error",
+        },
+      ],
+    });
+  }
+});
+
+router.get(`/categories`, async (req: Request, res: Response) => {
+  try {
+    let categories = await CategoryModel.find({}).select("-products -date");
+    res.send({ categories });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).send({
+      errors: [
+        {
+          msg: "Server error",
+        },
+      ],
+    });
+  }
+});
+
+router.get(`/category/:category`, async (req: Request, res: Response) => {
+  try {
+    let category = req.params.category;
+    let products = await ProductModel.find({}).where("category", category);
     res.json({ products });
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json({
+    return res.status(500).send({
+      errors: [
+        {
+          msg: "Server error",
+        },
+      ],
+    });
+  }
+});
+
+router.post(
+  `/categories`,
+  [auth, check("name").notEmpty().withMessage("Category name is required")],
+  async (req: Request, res: Response) => {
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).send({ errors: result.array() });
+    }
+    try {
+      let category = new CategoryModel({ ...req.body });
+      await category.save();
+      res.send({ category });
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).send({
+        errors: [
+          {
+            msg: "Server error",
+          },
+        ],
+      });
+    }
+  }
+);
+
+router.patch(
+  `/categories/:id`,
+  [auth, check("name").notEmpty().withMessage("Category name is required")],
+  async (req: Request, res: Response) => {
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).send({ errors: result.array() });
+    }
+    try {
+      const id = req.params.id;
+      let category = await CategoryModel.findById(id);
+
+      if (!category) {
+        return res
+          .status(404)
+          .send({ errors: [{ msg: "Category not found" }] });
+      }
+
+      // @ts-ignore
+      category.name = req.body.name;
+
+      await category.save();
+      res.send({ category });
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).send({
+        errors: [
+          {
+            msg: "Server error",
+          },
+        ],
+      });
+    }
+  }
+);
+
+router.delete(`/categories/:id`, auth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    let category = await CategoryModel.findById(id);
+
+    if (!category) {
+      return res.status(404).send({ errors: [{ msg: "Category not found" }] });
+    }
+
+    await CategoryModel.findByIdAndDelete(id);
+
+    res.send({ category });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).send({
       errors: [
         {
           msg: "Server error",
@@ -63,7 +184,7 @@ router.get(`/:id`, async (req: Request, res: Response) => {
     let product = await ProductModel.findById(id);
 
     if (!product) {
-      return res.status(404).json({
+      return res.status(404).send({
         errors: [
           {
             msg: "product not found",
@@ -71,10 +192,10 @@ router.get(`/:id`, async (req: Request, res: Response) => {
         ],
       });
     }
-    res.json({ product });
+    res.send({ product });
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json({
+    return res.status(500).send({
       errors: [
         {
           msg: "Server error",
@@ -98,7 +219,7 @@ router.post(
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
-      return res.status(400).json({ errors: result.array() });
+      return res.status(400).send({ errors: result.array() });
     }
     try {
       const product = new ProductModel({ ...req.body });
@@ -111,10 +232,10 @@ router.post(
 
       await product.save();
 
-      res.json({ product });
+      res.send({ product });
     } catch (error) {
       console.log(error.message);
-      return res.status(500).json({
+      return res.status(500).send({
         errors: [
           {
             msg: "Server error",
@@ -134,7 +255,7 @@ router.patch(
       let product = await ProductModel.findById(id);
 
       if (!product) {
-        return res.status(404).json({
+        return res.status(404).send({
           errors: [
             {
               msg: "product not found",
@@ -157,10 +278,10 @@ router.patch(
 
       await product.save();
 
-      res.json({ product });
+      res.send({ product });
     } catch (error) {
       console.log(error.message);
-      return res.status(500).json({
+      return res.status(500).send({
         errors: [
           {
             msg: "Server error",
@@ -177,7 +298,7 @@ router.delete(`/:id`, [auth], async (req: Request, res: Response) => {
     let product = await ProductModel.findById(id);
 
     if (!product) {
-      return res.status(404).json({
+      return res.status(404).send({
         errors: [
           {
             msg: "product not found",
@@ -187,10 +308,10 @@ router.delete(`/:id`, [auth], async (req: Request, res: Response) => {
     }
 
     await ProductModel.findByIdAndDelete(id);
-    res.json({ product });
+    res.send({ product });
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json({
+    return res.status(500).send({
       errors: [
         {
           msg: "Server error",

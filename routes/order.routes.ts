@@ -7,7 +7,12 @@ const router = Router();
 
 router.get(`/`, [auth], async (req: Request, res: Response) => {
   try {
-    let orders = await OrderModel.find({});
+    let orders = await OrderModel.find({}).populate("products", [
+      "name",
+      "category",
+      "price",
+      "image",
+    ]);
     res.json({ orders });
   } catch (error) {
     console.log(error.message);

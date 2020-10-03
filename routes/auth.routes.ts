@@ -54,6 +54,7 @@ router.post(
           errors: [
             {
               msg: "User not found",
+              param: "email",
             },
           ],
         });
@@ -67,6 +68,7 @@ router.post(
           errors: [
             {
               msg: "Invalid password",
+              param: "password",
             },
           ],
         });
@@ -79,7 +81,8 @@ router.post(
       const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
         expiresIn: `48h`,
       });
-      console.log(token);
+
+      user = await UserModel.findById(userId).select("-password");
 
       res.json({ token, user });
     } catch (error) {
