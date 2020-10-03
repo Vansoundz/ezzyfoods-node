@@ -4,10 +4,31 @@ import UserModel from "../models/user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
+import auth from "../middleware/auth.middleware";
 
 config();
 
 const router = Router();
+
+router.get(`/`, [auth], async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    let user = await UserModel.findById(req.userId).select("-password");
+    if (!user) {
+      return res.status(401).json({ errors: [{ msg: "Unauthorized" }] });
+    }
+    res.json({ user });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      errors: [
+        {
+          msg: "Server error",
+        },
+      ],
+    });
+  }
+});
 
 router.post(
   "/login",
