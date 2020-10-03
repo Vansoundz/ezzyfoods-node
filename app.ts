@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import products from "./routes/product.routes";
 import users from "./routes/auth.routes";
 import orders from "./routes/order.routes";
+import cors from "cors";
 
 config();
 
@@ -14,7 +15,7 @@ const app: Application = Express();
 const PORT = process.env.PORT || 5000;
 
 app.use(Express.json());
-
+app.use(cors());
 (async () => {
   const MONGO_URI = process.env.MONGO_URI!;
   try {
