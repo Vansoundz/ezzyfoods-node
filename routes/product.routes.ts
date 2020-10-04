@@ -4,8 +4,8 @@ import auth from "../middleware/auth.middleware";
 import ProductModel from "../models/product.model";
 import multer from "multer";
 import multerS3 from "multer-s3";
-// @ts-ignore
-import aws, { S3 } from "aws-sdk";
+
+import { S3 } from "aws-sdk";
 import { config } from "dotenv";
 import CategoryModel from "../models/category.model";
 
@@ -226,6 +226,8 @@ router.post(
       if (req.file) {
         // @ts-ignore
         product.image = req.file.location;
+        // @ts-ignore
+        product.key = req.file.key;
       }
       // @ts-ignore
       product.user = req.userId;
@@ -306,6 +308,16 @@ router.delete(`/:id`, [auth], async (req: Request, res: Response) => {
         ],
       });
     }
+
+    let resp = await s3
+      .deleteObject({
+        Bucket: "ezzyfoodz",
+        // @ts-ignore
+        Key: product.key,
+      })
+      .promise();
+
+    console.log(resp);
 
     await ProductModel.findByIdAndDelete(id);
     res.send({ product });
