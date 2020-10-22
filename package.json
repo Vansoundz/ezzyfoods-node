@@ -5,12 +5,10 @@
   "main": "app.js",
   "author": "vansoundz",
   "license": "MIT",
-  "engines": {
-    "node": "13.x"
-  },
+  
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.ts",
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts",
     "build": "tsc"
   },
   "dependencies": {
