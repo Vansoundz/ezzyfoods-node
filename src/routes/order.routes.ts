@@ -148,7 +148,9 @@ router.patch(`/:id/failed`, auth, async (req: Request, res: Response) => {
 
 router.get(`/delivered`, auth, async (req: Request, res: Response) => {
   try {
-    let orders = await OrderModel.find({ status: "delivered" });
+    let orders = await OrderModel.find({
+      status: "delivered",
+    }).populate("products", ["name", "category", "price", "image"]);
     res.json({ orders });
   } catch (error) {
     console.log(error.message);
@@ -164,7 +166,9 @@ router.get(`/delivered`, auth, async (req: Request, res: Response) => {
 
 router.get(`/failed`, auth, async (req: Request, res: Response) => {
   try {
-    let orders = await OrderModel.find({ status: "failed" });
+    let orders = await OrderModel.find({
+      status: "failed",
+    }).populate("products", ["name", "category", "price", "image"]);
     res.json({ orders });
   } catch (error) {
     console.log(error.message);
