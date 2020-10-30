@@ -5,6 +5,7 @@ const UserSchema = new Schema({
   email: { type: String, unique: true, lowercase: true },
   phone: { type: String },
   password: { type: String },
+  isAdmin: { type: Boolean, default: false },
   products: [
     {
       type: Types.ObjectId,
