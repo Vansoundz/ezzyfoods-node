@@ -8,6 +8,7 @@ const ProductSchema = new Schema({
   key: { type: String },
   quantity: { type: String, required: true },
   user: { type: Types.ObjectId, ref: "user" },
+
   images: [
     {
       type: String,

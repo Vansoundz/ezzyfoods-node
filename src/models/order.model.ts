@@ -11,7 +11,13 @@ const OrderSchema = new Schema({
   customer: {
     name: { type: String },
     phone: { type: String },
+    location: {
+      type: String,
+      enum: ["gate a", "gate b", "gate c", "gachororo", "oasis", "jkuat"],
+      default: "jkuat",
+    },
   },
+
   discount: {
     type: String,
   },
